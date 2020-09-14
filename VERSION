@@ -1,0 +1,9 @@
+commit dd23f92f16428136c54c1d779395ffb15fee2e7c
+Author: Emmett Lalish <elalish@google.com>
+Date:   Mon Sep 14 16:29:55 2020 -0700
+
+    Add another ligththouse example (#1534)
+    
+    * added perf pic
+    
+    * added second example
