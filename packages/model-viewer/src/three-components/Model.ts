@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {AnimationAction, AnimationClip, AnimationMixer, Box3, Object3D, Vector3} from 'three';
+import {AnimationAction, AnimationClip, AnimationMixer, Box3, LoopOnce, Object3D, Vector3,} from 'three';
 
 import ModelViewerElementBase, {$renderer} from '../model-viewer-base.js';
 
@@ -23,7 +23,7 @@ import {reduceVertices} from './ModelUtils.js';
 import {Shadow} from './Shadow.js';
 
 export const DEFAULT_FOV_DEG = 45;
-const DEFAULT_HALF_FOV = (DEFAULT_FOV_DEG / 2) * Math.PI / 180;
+const DEFAULT_HALF_FOV = ((DEFAULT_FOV_DEG / 2) * Math.PI) / 180;
 export const SAFE_RADIUS_RATIO = Math.sin(DEFAULT_HALF_FOV);
 export const DEFAULT_TAN_FOV = Math.tan(DEFAULT_HALF_FOV);
 
@@ -192,6 +192,20 @@ export default class Model extends Object3D {
       return;
     }
 
+    // make two arrays of animations
+    // one of animations including "playOnce"
+    // one of rest
+    let playOnceAnims =
+        animations.filter((clip) => clip.name.includes('Action'));
+    let availableAnims =
+        animations.filter((clip) => !clip.name.includes('Action'));
+
+    playOnceAnims.forEach((clip) => {
+      let playAnim = this.mixer.clipAction(clip, this).play();
+      playAnim.loop = LoopOnce;
+      playAnim.clampWhenFinished = true;
+    });
+
     let animationClip = null;
 
     if (name != null) {
@@ -199,7 +213,8 @@ export default class Model extends Object3D {
     }
 
     if (animationClip == null) {
-      animationClip = animations[0];
+      // animationClip = animations[0];
+      animationClip = availableAnims[0];
     }
 
     try {
@@ -269,7 +284,7 @@ export default class Model extends Object3D {
     if (center == null) {
       this.boundingBox.setFromObject(this.modelContainer);
       this.boundingBox.getSize(this.size);
-      center = this.boundingBox.getCenter(new Vector3);
+      center = this.boundingBox.getCenter(new Vector3());
     }
 
     const radiusSquared = (value: number, vertex: Vector3): number => {
